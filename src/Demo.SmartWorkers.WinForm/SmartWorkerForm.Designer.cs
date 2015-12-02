@@ -55,6 +55,7 @@
 			this.textBox25 = new System.Windows.Forms.TextBox();
 			this.startButton = new System.Windows.Forms.Button();
 			this.clockLabel = new System.Windows.Forms.Label();
+			this._algorithmList = new System.Windows.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// textBox1
@@ -359,9 +360,9 @@
 			// 
 			// startButton
 			// 
-			this.startButton.Location = new System.Drawing.Point(12, 12);
+			this.startButton.Location = new System.Drawing.Point(330, 12);
 			this.startButton.Name = "startButton";
-			this.startButton.Size = new System.Drawing.Size(100, 23);
+			this.startButton.Size = new System.Drawing.Size(62, 23);
 			this.startButton.TabIndex = 25;
 			this.startButton.Text = "Start";
 			this.startButton.UseVisualStyleBackColor = true;
@@ -378,11 +379,22 @@
 			this.clockLabel.Text = "00:00:00";
 			this.clockLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
+			// _algorithmList
+			// 
+			this._algorithmList.DisplayMember = "Text";
+			this._algorithmList.FormattingEnabled = true;
+			this._algorithmList.Location = new System.Drawing.Point(12, 14);
+			this._algorithmList.Name = "_algorithmList";
+			this._algorithmList.Size = new System.Drawing.Size(312, 21);
+			this._algorithmList.TabIndex = 28;
+			this._algorithmList.ValueMember = "Text";
+			// 
 			// SmartWorkerForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(549, 181);
+			this.Controls.Add(this._algorithmList);
 			this.Controls.Add(this.clockLabel);
 			this.Controls.Add(this.startButton);
 			this.Controls.Add(this.textBox21);
@@ -446,6 +458,7 @@
 		private System.Windows.Forms.TextBox textBox25;
 		private System.Windows.Forms.Button startButton;
 		private System.Windows.Forms.Label clockLabel;
+		private System.Windows.Forms.ComboBox _algorithmList;
 	}
 }
 

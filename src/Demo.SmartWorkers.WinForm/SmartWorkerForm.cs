@@ -8,9 +8,27 @@ namespace Demo.SmartWorkers.WinForm
 {
 	public partial class SmartWorkerForm : Form
 	{
+		private const string AlgorithmListText = "[Choose an Algorithm]";
+
 		public SmartWorkerForm()
 		{
 			InitializeComponent();
+
+			_algorithmList.Text = AlgorithmListText;
+			Algorithm[] algorithms = 
+			{
+				new Algorithm() {Text = "Centralized - Priority Order", Function = RunSmartWorkersInPriorityOrder},
+				new Algorithm() {Text = "Decentralized - Random Order", Function = RunSmartWorkersInRandom},
+				new Algorithm() {Text = "Decentralized - Random Start, Sequence Order", Function = RunSmartWorkersInSequence}
+			};
+
+			_algorithmList.Items.AddRange(algorithms);
+		}
+
+		public class Algorithm
+		{
+			public string Text { get; set; }
+			public Action<SmartWorker, VisualCounter[]> Function { get; set; }
 		}
 
 		public delegate void UpdateTextBoxMethod(string id);
@@ -29,9 +47,13 @@ namespace Demo.SmartWorkers.WinForm
 			}
 		}
 
-
 		private void startButton_Click(object sender, EventArgs e)
 		{
+			if (_algorithmList.Text == AlgorithmListText)
+			{
+				return;
+			}
+
 			ThreadPool.QueueUserWorkItem(RunClock, clockLabel);
 
 			var counters = new[]
@@ -63,18 +85,34 @@ namespace Demo.SmartWorkers.WinForm
 				new VisualCounter(textBox25, 1),
 			};
 
-			Enumerable.Range(1, 9)
+			var state = new State {AlgorithmList = _algorithmList, Counters = counters};
+
+			Enumerable.Range(1, 100)
 				.ToList()
-				.ForEach(index => ThreadPool.QueueUserWorkItem(RunSmartWorker, counters));
+				.ForEach(index => ThreadPool.QueueUserWorkItem(RunSmartWorker, state));
+		}
+
+		public class State
+		{
+			public ComboBox AlgorithmList { get; set; }
+			public VisualCounter[] Counters { get; set; }
+			public ManualResetEvent ResetEvent { get; set; }
 		}
 
 		private void RunSmartWorker(object state)
 		{
-			var counters = (VisualCounter[])state;
+			var castState = state as State;
+			var counters = castState.Counters;
 			var worker = new SmartWorker();
+			
+			Algorithm algorithm = null;
+			var algorithmList = castState.AlgorithmList;
+			algorithmList.Parent.Invoke(new MethodInvoker(delegate()
+			{
+				algorithm = algorithmList.SelectedItem as Algorithm;
+			}));
 
-			RunSmartWorkersInRandom(worker, counters);
-			//RunSmartWorkersInSequence(worker, counters);
+			algorithm.Function(worker, counters);
 		}
 
 		private void RunClock(object state)
@@ -117,6 +155,23 @@ namespace Demo.SmartWorkers.WinForm
 			{
 				var index = RandomNumber.Next();
 				worker.Execute(counters[index]);
+			}
+		}
+
+		private void RunSmartWorkersInPriorityOrder(SmartWorker worker, VisualCounter[] counters)
+		{
+			while (true)
+			{
+				var item = counters
+					.Select((counter, i) => new Tuple<int, VisualCounter>(i, counter))
+					.Where(x => x.Item2.Counter != x.Item2.MaxWorkers)
+					.OrderBy(x => x.Item2.Counter)
+					.FirstOrDefault();
+
+				if (item != null)
+				{
+					worker.Execute(counters[item.Item1]);
+				}
 			}
 		}
 	}
